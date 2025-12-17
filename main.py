@@ -12,8 +12,50 @@ from deep_translator import GoogleTranslator
 # 設定熱鍵 (可自訂)
 HOTKEY = "shift+alt+a"
 
+# 支援的語言
+LANGUAGES = {
+    '1': ('zh-TW', '中文'),
+    '2': ('en', '英文'),
+    '3': ('ko', '韓文'),
+    '4': ('ja', '日文'),
+}
+
+def select_language():
+    """讓用戶選擇來源語言和目標語言"""
+    print("\n🌐 AI 翻譯助手 - 語言設定")
+    print("=" * 30)
+    
+    # 選擇來源語言
+    print("\n選擇來源語言 (預設為中文, 按 Enter 用預設):")
+    for key, (code, name) in LANGUAGES.items():
+        print(f"  {key}. {name}")
+    
+    source_choice = input("\n請輸入數字: ").strip()
+    if source_choice == '' or source_choice not in LANGUAGES:
+        source_choice = '1'  # 預設中文
+    source_code, source_name = LANGUAGES[source_choice]
+    
+    # 選擇目標語言
+    print(f"\n選擇目標語言 (預設為英文, 按 Enter 用預設):")
+    for key, (code, name) in LANGUAGES.items():
+        print(f"  {key}. {name}")
+    
+    target_choice = input("\n請輸入數字: ").strip()
+    if target_choice == '' or target_choice not in LANGUAGES:
+        target_choice = '2'  # 預設英文
+    target_code, target_name = LANGUAGES[target_choice]
+    
+    print(f"\n✅ 設定完成: {source_name} → {target_name}")
+    print("=" * 30)
+    
+    return source_code, target_code, source_name, target_name
+
 class TranslatorApp:
-    def __init__(self):
+    def __init__(self, source_lang='zh-TW', target_lang='en', source_name='中文', target_name='英文'):
+        self.source_lang = source_lang
+        self.target_lang = target_lang
+        self.source_name = source_name
+        self.target_name = target_name
         # 設定主題
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
@@ -68,7 +110,7 @@ class TranslatorApp:
         self.close_btn.pack(side="right", pady=5, padx=(0, 5))
 
         # 翻譯器
-        self.translator = GoogleTranslator(source='zh-TW', target='en')
+        self.translator = GoogleTranslator(source=self.source_lang, target=self.target_lang)
 
         # 初始定位
         self.position_at_cursor()
@@ -148,12 +190,16 @@ class TranslatorApp:
 
     def run(self):
         """啟動應用程式"""
-        print(f"🚀 AI 翻譯助手已啟動！按 {HOTKEY.upper()} 喚出視窗")
+        print(f"\n🚀 AI 翻譯助手已啟動！")
+        print(f"🌐 翻譯方向: {self.source_name} → {self.target_name}")
+        print(f"⌨️  熱鍵: {HOTKEY.upper()}")
+        print(f"\n💡 關閉此視窗即可結束程式")
         self.root.mainloop()
 
 
 def main():
-    app = TranslatorApp()
+    source_code, target_code, source_name, target_name = select_language()
+    app = TranslatorApp(source_code, target_code, source_name, target_name)
     app.run()
 
 
