@@ -35,20 +35,37 @@ class TranslatorApp:
         self.main_frame = ctk.CTkFrame(self.root, corner_radius=0, fg_color=transparent_color)
         self.main_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
-        # 輸入框"""  """
+        # 水平容器 (輸入框 + 關閉按鈕)
+        self.input_frame = ctk.CTkFrame(self.main_frame, corner_radius=10, fg_color="#16213e")
+        self.input_frame.pack(pady=5, padx=5, fill="x", expand=True)
+
+        # 輸入框
         self.entry = ctk.CTkEntry(
-            self.main_frame,
+            self.input_frame,
             placeholder_text="輸入中文，按 Enter 翻譯...",
-            width=300,
+            width=260,
             height=40,
             font=ctk.CTkFont(size=14),
-            corner_radius=10
+            corner_radius=10,
+            border_width=0
         )
-        self.entry.pack(pady=5, padx=5, fill="x", expand=True)
+        self.entry.pack(side="left", pady=5, padx=(10, 5), fill="x", expand=True)
         self.entry.bind("<Return>", self.translate_text)
         self.entry.bind("<Escape>", self.hide_window)
 
-
+        # 關閉按鈕
+        self.close_btn = ctk.CTkButton(
+            self.input_frame,
+            text="✕",
+            width=30,
+            height=30,
+            font=ctk.CTkFont(size=14),
+            corner_radius=5,
+            fg_color="transparent",
+            hover_color="#e94560",
+            command=self.hide_window
+        )
+        self.close_btn.pack(side="right", pady=5, padx=(0, 5))
 
         # 翻譯器
         self.translator = GoogleTranslator(source='zh-TW', target='en')
