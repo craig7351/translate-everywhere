@@ -1,4 +1,4 @@
-name: Build EXE
+name: Build Apps
 
 on:
   push:
@@ -7,7 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  # Windows 版本
+  build-windows:
     runs-on: windows-latest
     
     steps:
@@ -31,13 +32,61 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: translator-exe
+          name: translator-windows
           path: dist/translator.exe
 
+  # macOS 版本
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements_mac.txt
+          pip install pyinstaller
+
+      - name: Build macOS App
+        run: |
+          pyinstaller --onefile --name translator-mac main_mac.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: translator-macos
+          path: dist/translator-mac
+
+  # 發佈 Release
+  release:
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: translator-windows
+          path: dist-windows
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: translator-macos
+          path: dist-macos
+
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/translator.exe
+          files: |
+            dist-windows/translator.exe
+            dist-macos/translator-mac
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
